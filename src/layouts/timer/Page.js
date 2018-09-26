@@ -17,6 +17,7 @@ export class TimerPage extends React.Component {
     secondsLeft: 22,
     endTime: 0,
     currentSessionMinutes: 7,
+    currentSessionIndex: 0,
   }
 
   componentDidMount() {
@@ -24,16 +25,27 @@ export class TimerPage extends React.Component {
   }
 
   onStart() {
-
+    debugger;
+    const { currentSessionIndex } = this.state
     // check if is last
     // start next interval
     // 
+    const sessionTime = defaultSessionTime[currentSessionIndex]
+    if (!sessionTime) return
 
+    this.setState({ secondsLeft: sessionTime * 60 })
+
+    this.runCountdown()
   }
 
   runCountdown() {
+    clearInterval(countdown)
     const countdown = setInterval(() => {
-      if (this.state.secondsLeft < 0) return
+      if (this.state.secondsLeft <= 0) {
+        return this.setState(prevState => ({
+          currentSessionIndex: prevState.currentSessionIndex + 1
+        }))
+      }
 
       this.setState(prevState => ({
         secondsLeft: prevState.secondsLeft - 1
@@ -64,7 +76,9 @@ export class TimerPage extends React.Component {
           </CircleBorder>
         </Container>
         <hr />
-        <Controls />
+        <Controls
+          onStart={() => { this.onStart() }}
+        />
       </div>
     )
   }
