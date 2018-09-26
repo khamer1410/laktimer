@@ -1,11 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export class TimerPage extends React.Component {
-  state = {
-    isActive: false,
-  }
+const defaultSessionTime = [7, 7, 5, 5, 3, 3]
 
+export class TimerPage extends React.Component {
   static propTypes = {
 
   }
@@ -14,6 +12,47 @@ export class TimerPage extends React.Component {
 
   }
 
+  state = {
+    isActive: false,
+    secondsLeft: 22,
+    endTime: 0,
+    currentSessionMinutes: 7,
+  }
+
+  componentDidMount() {
+    this.runCountdown();
+  }
+
+  onStart() {
+
+    // check if is last
+    // start next interval
+    // 
+
+  }
+
+  runCountdown() {
+    const countdown = setInterval(() => {
+      if (this.state.secondsLeft < 0) return
+
+      this.setState(prevState => ({
+        secondsLeft: prevState.secondsLeft - 1
+      }))
+
+    }, 1000)
+  }
+
+  displayTimeLeft(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainderSeconds = seconds % 60;
+    const display = `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+    document.title = display;
+    this.setState(() => ({
+      timeLeft: minutes,
+    }))
+  }
+
+
   render() {
     return (
       <div>
@@ -21,7 +60,7 @@ export class TimerPage extends React.Component {
         <hr />
         <Container>
           <CircleBorder>
-            <Timer />
+            <Timer timeLeft={this.state.secondsLeft} />
           </CircleBorder>
         </Container>
         <hr />
@@ -45,11 +84,13 @@ class Header extends React.Component {
 }
 
 class Timer extends React.Component {
+
   render() {
+    const { timeLeft } = this.props;
     return (
       <div>
-        <h2>00:00</h2>
-        <p>Time left: 00:00</p>
+        <h2>{timeLeft}</h2>
+        {/* <p>End time: 00:00</p> */}
       </div>
     )
   }
@@ -66,7 +107,7 @@ class Controls extends React.Component {
     return (
       <ControlsWrapper>
         <ControlBtn onClick={this.props.onBack}>&#x2190;</ControlBtn>
-        <ControlBtn onClick={this.props.onPlay}>&#9658;</ControlBtn>
+        <ControlBtn onClick={this.props.onStart}>&#9658;</ControlBtn>
         <ControlBtn onClick={this.props.onForward}>&#x2192;</ControlBtn>
       </ControlsWrapper>
     )
