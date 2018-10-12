@@ -20,14 +20,13 @@ export class TimerPage extends React.Component {
       isActive: false,
       secondsLeft: 0,
       endTime: 0,
-      currentSessionMinutes: 7,
       currentSessionIndex: 0,
     }
 
     this.currentInterval = null
-    this.onForward.bind(this);
-    this.onBack.bind(this);
-    this.onStart.bind(this);
+    this.onStart = this.onStart.bind(this);
+    this.onForward = this.onForward.bind(this);
+    this.onBack = this.onBack.bind(this);
   }
 
   componentDidMount() {
@@ -40,13 +39,11 @@ export class TimerPage extends React.Component {
 
   onStart() {
     const { currentSessionIndex } = this.state
-    // check if is last
-    // start next interval
-    //
     const sessionTime = defaultSessionTime[currentSessionIndex]
-    if (!sessionTime) return
-
-    this.setState({ secondsLeft: sessionTime * 60 })
+    if (!sessionTime) return this.endSession()
+    this.setState({
+      secondsLeft: sessionTime * 60,
+    })
 
     this.runCountdown()
   }
@@ -54,21 +51,26 @@ export class TimerPage extends React.Component {
   onForward() {
     this.setState(prevState => ({
       currentSessionIndex: prevState.currentSessionIndex + 1
-    }))
+    }),
+      this.onStart)
   }
 
   onBack() {
     this.setState(prevState => ({
       currentSessionIndex: prevState.currentSessionIndex - 1
-    }))
+    }),
+      this.onStart)
   }
 
   runCountdown() {
     clearInterval(this.currentInterval);
+    this.setState({
+      isActive: true,
+    })
 
     this.currentInterval = setInterval(() => {
       if (this.state.secondsLeft <= 0) {
-        return this.onForward()
+        this.endSession()
       }
 
       this.setState(prevState => ({
@@ -78,11 +80,18 @@ export class TimerPage extends React.Component {
     }, 1000)
   }
 
+  endSession() {
+    this.setState({
+      isActive: false,
+    })
+    return clearInterval(this.currentInterval);
+  }
+
 
   render() {
     return (
       <div>
-        <Header />
+        <Header sessions={defaultSessionTime} currentSession={this.state.currentSessionIndex} />
         <hr />
         <Container>
           <CircleBorder>
@@ -103,9 +112,15 @@ export class TimerPage extends React.Component {
 
 class Header extends React.Component {
   render() {
+    const { sessions, currentSession } = this.props
     return (
       <header>
         <h2>Sesje</h2>
+        <SessionsContainer>
+          {sessions.map((session, i) => (
+            <SessionNumber key={i} active={currentSession === i}>{session}</SessionNumber>
+          ))}
+        </SessionsContainer>
         {/* props liczba i czas sesji */}
       </header>
     )
@@ -157,4 +172,18 @@ const Container = styled.div`
 `
 const Clock = styled.h2`
   font-size: 90px;
+`
+const SessionNumber = styled.span`
+  ${props =>
+    props.active && `
+      font-weight: bold;
+      color: tomato;
+      transform: scale(2);
+    `
+  }
+`
+
+const SessionsContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
 `
