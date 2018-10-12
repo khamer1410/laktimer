@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import Controls from 'layouts/timer/Controls';
 
 const defaultSessionTime = [7, 7, 5, 5, 3, 3]
 
@@ -12,24 +13,36 @@ export class TimerPage extends React.Component {
 
   }
 
-  state = {
-    isActive: false,
-    secondsLeft: 22,
-    endTime: 0,
-    currentSessionMinutes: 7,
-    currentSessionIndex: 0,
+  constructor() {
+    super();
+
+    this.state = {
+      isActive: false,
+      secondsLeft: 0,
+      endTime: 0,
+      currentSessionMinutes: 7,
+      currentSessionIndex: 0,
+    }
+
+    this.currentInterval = null
+    this.onForward.bind(this);
+    this.onBack.bind(this);
+    this.onStart.bind(this);
   }
 
   componentDidMount() {
-    this.runCountdown();
+    // this.runCountdown();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.currentInterval)
   }
 
   onStart() {
-    debugger;
     const { currentSessionIndex } = this.state
     // check if is last
     // start next interval
-    // 
+    //
     const sessionTime = defaultSessionTime[currentSessionIndex]
     if (!sessionTime) return
 
@@ -38,13 +51,24 @@ export class TimerPage extends React.Component {
     this.runCountdown()
   }
 
+  onForward() {
+    this.setState(prevState => ({
+      currentSessionIndex: prevState.currentSessionIndex + 1
+    }))
+  }
+
+  onBack() {
+    this.setState(prevState => ({
+      currentSessionIndex: prevState.currentSessionIndex - 1
+    }))
+  }
+
   runCountdown() {
-    clearInterval(countdown)
-    const countdown = setInterval(() => {
+    clearInterval(this.currentInterval);
+
+    this.currentInterval = setInterval(() => {
       if (this.state.secondsLeft <= 0) {
-        return this.setState(prevState => ({
-          currentSessionIndex: prevState.currentSessionIndex + 1
-        }))
+        return this.onForward()
       }
 
       this.setState(prevState => ({
@@ -52,16 +76,6 @@ export class TimerPage extends React.Component {
       }))
 
     }, 1000)
-  }
-
-  displayTimeLeft(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainderSeconds = seconds % 60;
-    const display = `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
-    document.title = display;
-    this.setState(() => ({
-      timeLeft: minutes,
-    }))
   }
 
 
@@ -77,13 +91,14 @@ export class TimerPage extends React.Component {
         </Container>
         <hr />
         <Controls
-          onStart={() => { this.onStart() }}
+          onStart={this.onStart}
+          onForward={this.onForward}
+          onBack={this.onBack}
         />
       </div>
     )
   }
 }
-
 
 
 class Header extends React.Component {
@@ -99,34 +114,28 @@ class Header extends React.Component {
 
 class Timer extends React.Component {
 
+  displayTimeLeft(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainderSeconds = seconds % 60;
+    const display = `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+    document.title = display;
+    return display;
+  }
+
   render() {
     const { timeLeft } = this.props;
+
+    const displayedTime = this.displayTimeLeft(timeLeft);
     return (
       <div>
-        <h2>{timeLeft}</h2>
+        <Clock>{displayedTime}</Clock>
         {/* <p>End time: 00:00</p> */}
       </div>
     )
   }
 }
 
-class Controls extends React.Component {
-  static defaultProps = {
-    onBack: () => { },
-    onPlay: () => { },
-    onForward: () => { },
-  }
 
-  render() {
-    return (
-      <ControlsWrapper>
-        <ControlBtn onClick={this.props.onBack}>&#x2190;</ControlBtn>
-        <ControlBtn onClick={this.props.onStart}>&#9658;</ControlBtn>
-        <ControlBtn onClick={this.props.onForward}>&#x2192;</ControlBtn>
-      </ControlsWrapper>
-    )
-  }
-}
 
 // Styled components
 const CircleBorder = styled.div`
@@ -146,19 +155,6 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
 `
-
-const ControlsWrapper = styled.div`
-  display: flex;
-  justify-content: space-around;
-`
-
-const ControlBtn = styled.button`
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: #001f3f;
-  border: none
-
-  color: #7FDBFF;
-  font-size: 40px;
+const Clock = styled.h2`
+  font-size: 90px;
 `
