@@ -70,7 +70,7 @@ export class TimerPage extends React.Component {
 
     this.currentInterval = setInterval(() => {
       if (this.state.secondsLeft <= 0) {
-        this.endSession()
+        return this.endSession()
       }
 
       this.setState(prevState => ({
