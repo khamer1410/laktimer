@@ -3,7 +3,10 @@ import logo from 'logo.svg';
 import './App.css';
 import { TimerPage } from 'layouts/timer/Page';
 
+
+
 class App extends Component {
+
   render() {
     return (
       <div className="App">
@@ -11,7 +14,9 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to Laktimer</h1>
         </header>
-        <TimerPage />
+        <main>
+          <TimerPage />
+        </main>
       </div>
     );
   }

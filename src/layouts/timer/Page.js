@@ -2,7 +2,17 @@ import React from 'react';
 import styled from 'styled-components';
 import Controls from 'layouts/timer/Controls';
 
-const defaultSessionTime = [7, 7, 5, 5, 3, 3]
+const availableSessions =
+  [
+    {
+      name: 'short',
+      times: [5, 5, 3, 3, 2, 2],
+    },
+    {
+      name: 'long',
+      times: [7, 7, 5, 5, 3, 3],
+    },
+  ]
 
 export class TimerPage extends React.Component {
   static propTypes = {
@@ -19,14 +29,16 @@ export class TimerPage extends React.Component {
     this.state = {
       isActive: false,
       secondsLeft: 0,
-      endTime: 0,
       currentSessionIndex: 0,
+      activeSession: {},
+      sessionPicked: false,
     }
 
     this.currentInterval = null
     this.onStart = this.onStart.bind(this);
     this.onForward = this.onForward.bind(this);
     this.onBack = this.onBack.bind(this);
+    this.sessionClickHandler = this.sessionClickHandler.bind(this)
   }
 
   componentDidMount() {
@@ -37,9 +49,18 @@ export class TimerPage extends React.Component {
     clearInterval(this.currentInterval)
   }
 
+  sessionClickHandler(sessionName) {
+    const pickedSession = availableSessions.find(session => session.name === sessionName);
+
+    this.setState({
+      activeSession: pickedSession,
+      sessionPicked: true,
+    })
+  }
+
   onStart() {
     const { currentSessionIndex } = this.state
-    const sessionTime = defaultSessionTime[currentSessionIndex]
+    const sessionTime = this.state.activeSession.times[currentSessionIndex]
     if (!sessionTime) return this.endSession()
     this.setState({
       secondsLeft: sessionTime * 60,
@@ -91,7 +112,12 @@ export class TimerPage extends React.Component {
   render() {
     return (
       <div>
-        <Header sessions={defaultSessionTime} currentSession={this.state.currentSessionIndex} />
+        <Header
+          sessions={this.state.activeSession.times}
+          currentSession={this.state.currentSessionIndex}
+          sessionPicked={this.state.sessionPicked}
+          onSessionClick={this.sessionClickHandler}
+        />
         <hr />
         <Container>
           <CircleBorder>
@@ -112,16 +138,24 @@ export class TimerPage extends React.Component {
 
 class Header extends React.Component {
   render() {
-    const { sessions, currentSession } = this.props
+    const { sessions, currentSession, sessionPicked, onSessionClick } = this.props;
+
     return (
       <header>
         <h2>Sesje</h2>
-        <SessionsContainer>
-          {sessions.map((session, i) => (
-            <SessionNumber key={i} active={currentSession === i}>{session}</SessionNumber>
-          ))}
-        </SessionsContainer>
-        {/* props liczba i czas sesji */}
+        {!sessionPicked && (
+          <SessionsContainer>
+            <StyledButton onClick={() => onSessionClick('short')}>Short</StyledButton>
+            <StyledButton onClick={() => onSessionClick('long')}>Long</StyledButton>
+          </SessionsContainer>
+        )}
+        {sessionPicked && (
+          <SessionsContainer>
+            {sessions.map((session, i) => (
+              <SessionNumber key={i} active={currentSession === i}>{session}</SessionNumber>
+            ))}
+          </SessionsContainer>
+        )}
       </header>
     )
   }
@@ -186,4 +220,20 @@ const SessionNumber = styled.span`
 const SessionsContainer = styled.div`
   display: flex;
   justify-content: space-around;
+`
+const StyledButton = styled.button`
+  padding: 1em;
+  flex: 1 1 0;
+  margin: 0 15px;
+  color: white;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 10px 0px;
+  background-color: rgb(91, 196, 190);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  font-size: 16px;
+  font-weight: 400;
+  outline: none;
+  transition: all 0.3s ease 0s;
+  background-repeat: no-repeat;
+  border-radius: 6px;
+  border-style: none;
 `
