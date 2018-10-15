@@ -110,26 +110,32 @@ export class TimerPage extends React.Component {
 
 
   render() {
+    const { activeSession, currentSessionIndex, sessionPicked } = this.state;
     return (
       <div>
         <Header
-          sessions={this.state.activeSession.times}
-          currentSession={this.state.currentSessionIndex}
-          sessionPicked={this.state.sessionPicked}
+          sessions={activeSession.times}
+          currentSession={currentSessionIndex}
+          sessionPicked={sessionPicked}
           onSessionClick={this.sessionClickHandler}
         />
         <hr />
-        <Container>
-          <CircleBorder>
-            <Timer timeLeft={this.state.secondsLeft} />
-          </CircleBorder>
-        </Container>
-        <hr />
-        <Controls
-          onStart={this.onStart}
-          onForward={this.onForward}
-          onBack={this.onBack}
-        />
+        {sessionPicked && (
+          <div>
+            <Container>
+              <CircleBorder>
+                <Timer timeLeft={this.state.secondsLeft} />
+              </CircleBorder>
+            </Container>
+            <hr />
+            <Controls
+              onStart={this.onStart}
+              onForward={this.onForward}
+              onBack={this.onBack}
+            />
+          </div>
+        )
+        }
       </div>
     )
   }
