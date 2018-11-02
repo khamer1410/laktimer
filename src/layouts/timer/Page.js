@@ -63,7 +63,7 @@ export class TimerPage extends React.Component {
 
   onStart() {
     const { currentSessionIndex } = this.state
-    const sessionTime = this.state.activeSession.times[currentSessionIndex] || 0
+    const sessionTime = this.state.activeSession.times[currentSessionIndex]
     if (!sessionTime) return this.endSession()
     this.setState({
       secondsLeft: sessionTime * 60,
@@ -73,6 +73,9 @@ export class TimerPage extends React.Component {
   }
 
   onForward() {
+    const { currentSessionIndex, activeSession } = this.state;
+    if (currentSessionIndex >= activeSession.times.length) return clearInterval(this.currentInterval)
+
     this.setState(prevState => ({
       currentSessionIndex: prevState.currentSessionIndex + 1
     }),
