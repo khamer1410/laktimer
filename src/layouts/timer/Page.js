@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import Controls from 'layouts/timer/Controls';
+import { vibrate } from 'utils/vibrate';
 
 const availableSessions =
   [
@@ -13,6 +14,8 @@ const availableSessions =
       times: [7, 7, 5, 5, 3, 3],
     },
   ]
+
+const sessionEndVibrations = [800, 800, 800, 800, 800, 1000]
 
 export class TimerPage extends React.Component {
   static propTypes = {
@@ -42,7 +45,7 @@ export class TimerPage extends React.Component {
   }
 
   componentDidMount() {
-    // this.runCountdown();
+    // this.onStart()
   }
 
   componentWillUnmount() {
@@ -60,7 +63,7 @@ export class TimerPage extends React.Component {
 
   onStart() {
     const { currentSessionIndex } = this.state
-    const sessionTime = this.state.activeSession.times[currentSessionIndex]
+    const sessionTime = this.state.activeSession.times[currentSessionIndex] || 0
     if (!sessionTime) return this.endSession()
     this.setState({
       secondsLeft: sessionTime * 60,
@@ -105,9 +108,14 @@ export class TimerPage extends React.Component {
     this.setState({
       isActive: false,
     })
-    return clearInterval(this.currentInterval);
-  }
 
+    clearInterval(this.currentInterval)
+
+    vibrate(sessionEndVibrations)
+
+    // automatically go to the next session
+    this.onForward()
+  }
 
   render() {
     const { activeSession, currentSessionIndex, sessionPicked } = this.state;
